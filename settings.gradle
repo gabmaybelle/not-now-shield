@@ -10,4 +10,4 @@ pluginManagement {
 }
 
 // Should match your modid
-rootProject.name = 'shieldstrip'
+rootProject.name = 'not-now-shield'
