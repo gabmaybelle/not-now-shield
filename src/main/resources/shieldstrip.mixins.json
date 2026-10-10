@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "com.gabbymaybelle.shieldstrip.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"AxeItemMixin",
+		"BlockTransformerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
