@@ -32,4 +32,4 @@ The mod jar is written to `build/libs/not-now-shield-<version>.jar`. Copy it int
 
 ## License
 
-CC0-1.0
+[MIT](LICENSE), from version 1.1.2. Versions up to 1.1.1 were released under CC0-1.0, and copies of those stay CC0.

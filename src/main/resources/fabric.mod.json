@@ -11,7 +11,7 @@
 		"sources": "https://github.com/gabmaybelle/not-now-shield",
 		"issues": "https://github.com/gabmaybelle/not-now-shield/issues"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/shieldstrip/icon.png",
 	"environment": "*",
 	"mixins": [
