@@ -7,6 +7,10 @@
 	"authors": [
 		"Gabby"
 	],
+	"contact": {
+		"sources": "https://github.com/gabmaybelle/not-now-shield",
+		"issues": "https://github.com/gabmaybelle/not-now-shield/issues"
+	},
 	"license": "CC0-1.0",
 	"icon": "assets/shieldstrip/icon.png",
 	"environment": "*",

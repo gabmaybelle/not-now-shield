@@ -5,7 +5,7 @@ A tiny Fabric mod for Minecraft 26.2 and 26.3: tools change blocks even while a 
 - **26.2:** axes strip logs, scrape copper and remove wax.
 - **26.3:** axes strip, hoes till and shovels make paths.
 
-Vanilla skips these right-click actions whenever a blocking item is in the off-hand (unless you sneak), so the shield goes up instead ([MC-273378](https://bugs-legacy.mojang.com/browse/MC-273378)). This mod lets the tool try first. When there is nothing to change, the click falls through and the shield raises as normal.
+Vanilla skips these right-click actions whenever a blocking item is in the off-hand (unless you sneak), so the shield goes up instead ([MC-273378](https://bugs.mojang.com/browse/MC/issues/MC-273378)). This mod lets the tool try first. When there is nothing to change, the click falls through and the shield raises as normal.
 
 It also works for modded tools that hand their right-click to the vanilla axe, hoe or shovel.
 
