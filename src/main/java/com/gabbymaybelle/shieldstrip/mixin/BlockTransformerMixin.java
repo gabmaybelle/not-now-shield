@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * matches, transformBlock still returns PASS and the off-hand shield is raised.
  *
  * BlockTransformer does not exist in 26.2, so the target is named by string and
- * marked {@link Pseudo}: on 26.2 this mixin is skipped and {@link AxeItemMixin}
- * applies instead.
+ * marked {@link Pseudo}. ShieldstripMixinPlugin only applies this mixin on 26.3 and
+ * later; on 26.2 {@link AxeItemMixin} applies instead.
  */
 @Pseudo
 @Mixin(targets = "net.minecraft.core.component.BlockTransformer")

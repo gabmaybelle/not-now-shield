@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * useOn still returns PASS and the off-hand shield is raised as normal.
  *
  * AxeItem no longer exists in 26.3, so the target is named by string and marked
- * {@link Pseudo}: on 26.3 this mixin is skipped and {@link BlockTransformerMixin}
- * applies instead.
+ * {@link Pseudo}. ShieldstripMixinPlugin only applies this mixin on 26.2; on 26.3
+ * {@link BlockTransformerMixin} applies instead.
  */
 @Pseudo
 @Mixin(targets = "net.minecraft.world.item.AxeItem")

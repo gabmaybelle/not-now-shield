@@ -18,7 +18,7 @@ One jar covers both versions with two mixins that make the off-hand check, `play
 | [`AxeItemMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/AxeItemMixin.java) | 26.2 | `AxeItem` |
 | [`BlockTransformerMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/BlockTransformerMixin.java) | 26.3 | `BlockTransformer` (data-driven axe, hoe and shovel actions) |
 
-Both are `@Pseudo` with string targets, so each one skips itself on the version where its class doesn't exist. On 26.3 the log shows a harmless `Error loading class: net/minecraft/world/item/AxeItem` warning because of this.
+A small mixin plugin, [`ShieldstripMixinPlugin`](src/main/java/com/gabbymaybelle/shieldstrip/ShieldstripMixinPlugin.java), checks the Minecraft version and applies only the mixin that fits, so the other target is never looked up and the log stays clean. Both mixins also name their targets by string and are `@Pseudo`, since each class only exists on one of the two versions.
 
 ## Building
 
