@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "shieldstrip_gametest",
+	"version": "1.0.0",
+	"name": "Not Now, Shield game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.gabbymaybelle.shieldstrip.ShieldstripClientTest"
+		]
+	},
+	"depends": {
+		"shieldstrip": "*"
+	}
+}

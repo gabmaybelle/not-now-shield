@@ -30,6 +30,8 @@ Requires JDK 25.
 
 The mod jar is written to `build/libs/not-now-shield-<version>.jar`. Copy it into your instance's `mods` folder.
 
+`./gradlew runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, and that an axe on stone leaves the click for the shield. It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. The tests use Fabric API; the mod itself doesn't.
+
 ## License
 
 [MIT](LICENSE), from version 1.1.2. Versions up to 1.1.1 were released under CC0-1.0, and copies of those stay CC0.

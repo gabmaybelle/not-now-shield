@@ -49,3 +49,20 @@ jar {
 		rename { "${it}_$projectName"}
 	}
 }
+
+// Client game tests: `./gradlew runClientGameTest` starts a real game and right-clicks tools with a
+// shield in the off-hand (add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run
+// them on 26.3). The tests use Fabric API's test helpers; the mod itself still needs only the loader.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "shieldstrip_gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}
+
+dependencies {
+	gametestImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
