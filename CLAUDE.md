@@ -9,6 +9,8 @@ while a shield is in the off-hand. One jar covers both versions. See README.md.
   `BlockTransformerMixin` for 26.3) and `ShieldstripMixinPlugin`, which applies only the one
   that fits the running version.
 - `src/gametest/`: the client game test (`ShieldstripClientTest`).
+- `art/icon.ase`: Gabby's own Aseprite sprite (16x16) for the icon. `icon.png` is it scaled to
+  512x512 with nearest-neighbour. Never replace it with generated art; re-export from this file.
 
 ## Build and test
 
