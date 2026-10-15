@@ -1,7 +1,8 @@
 # Not Now, Shield
 
 A tiny Fabric mod for Minecraft 26.2 and 26.3 (mod ID `shieldstrip`): tools change blocks even
-while a shield is in the off-hand. One jar covers both versions. See README.md.
+while a shield is in the off-hand, and the shield is drawn lower in first person so it covers less
+of the view. One jar covers both versions. See README.md.
 
 `PROGRESS.md` says what's done, what's broken and what's next, with a row per session: read
 it first, and add this session's row before ending.
@@ -9,8 +10,10 @@ it first, and add this session's row before ending.
 ## Layout
 
 - `src/main/java/com/gabbymaybelle/shieldstrip/`: two mixins (`AxeItemMixin` for 26.2,
-  `BlockTransformerMixin` for 26.3) and `ShieldstripMixinPlugin`, which applies only the one
-  that fits the running version.
+  `BlockTransformerMixin` for 26.3); two client-only drawing mixins that call `LowerShield`
+  (`ItemInHandRendererMixin` for 26.2, `FirstPersonHandsAndItemsRendererMixin` for 26.3, the
+  same renderer renamed); and `ShieldstripMixinPlugin`, which applies only the ones that fit the
+  running version, and the drawing ones only on a game client.
 - `src/gametest/`: the client game test (`ShieldstripClientTest`).
 - `art/icon.ase`: Gabby's own Aseprite sprite (16x16) for the icon. `icon.png` is it scaled to
   512x512 with nearest-neighbour. Never replace it with generated art; re-export from this file.
@@ -18,7 +21,9 @@ it first, and add this session's row before ending.
 ## Build and test
 
 - `./gradlew build`: builds against 26.2 (the jar players get).
-- `./gradlew runClientGameTest`: right-clicks tools with a shield in the off-hand. Add
+- `./gradlew runClientGameTest`: right-clicks tools with a shield in the off-hand, then holds
+  right-click to raise the shield and checks it's drawn lower (screenshots `shield-resting` and
+  `shield-raised` in `build/run/clientGameTest/screenshots/`). Add
   `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. Run both.
 
 ## Gotchas

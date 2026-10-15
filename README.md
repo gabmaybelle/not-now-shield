@@ -9,16 +9,25 @@ Vanilla skips these right-click actions whenever a blocking item is in the off-h
 
 It also works for modded tools that hand their right-click to the vanilla axe, hoe or shovel.
 
+Your shield is also drawn lower on your screen, resting or raised, so it covers less of your view. It still blocks just the same; only the picture moves, and only on your own screen. Modded shields are lowered too.
+
 ## How it works
 
-One jar covers both versions with two mixins that make the off-hand check, `playerHasBlockingItemUseIntent`, return `false`:
+One jar covers both versions. Two mixins make the off-hand check, `playerHasBlockingItemUseIntent`, return `false`:
 
 | Mixin | Minecraft | Target |
 |---|---|---|
 | [`AxeItemMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/AxeItemMixin.java) | 26.2 | `AxeItem` |
 | [`BlockTransformerMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/BlockTransformerMixin.java) | 26.3 | `BlockTransformer` (data-driven axe, hoe and shovel actions) |
 
-A small mixin plugin, [`ShieldstripMixinPlugin`](src/main/java/com/gabbymaybelle/shieldstrip/ShieldstripMixinPlugin.java), checks the Minecraft version and applies only the mixin that fits, so the other target is never looked up and the log stays clean. Both mixins also name their targets by string and are `@Pseudo`, since each class only exists on one of the two versions.
+Two more, on the game client only, lower the shield in first person through [`LowerShield`](src/main/java/com/gabbymaybelle/shieldstrip/LowerShield.java): each moves the hand down by 0.2 right after the hand renderer starts drawing a hand that holds anything with the `blocks_attacks` component.
+
+| Mixin | Minecraft | Target |
+|---|---|---|
+| [`ItemInHandRendererMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/ItemInHandRendererMixin.java) | 26.2 | `ItemInHandRenderer` |
+| [`FirstPersonHandsAndItemsRendererMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/FirstPersonHandsAndItemsRendererMixin.java) | 26.3 | `FirstPersonHandsAndItemsRenderer` (its new name) |
+
+A small mixin plugin, [`ShieldstripMixinPlugin`](src/main/java/com/gabbymaybelle/shieldstrip/ShieldstripMixinPlugin.java), checks the Minecraft version and applies only the mixins that fit (and the drawing ones only on a game client), so the other targets are never looked up and the log stays clean. All four name their targets by string and are `@Pseudo`, since each class only exists on one of the two versions.
 
 ## Building
 
@@ -32,7 +41,7 @@ The mod jar is written to `build/libs/not-now-shield-<version>.jar`. Copy it int
 
 The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source, and `src/main/resources/assets/shieldstrip/icon.png` is it scaled up to 512 pixels with each pixel kept sharp.
 
-`./gradlew runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, and that an axe on stone leaves the click for the shield. It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. The tests use Fabric API; the mod itself doesn't.
+`./gradlew runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. The tests use Fabric API; the mod itself doesn't.
 
 ## License
 

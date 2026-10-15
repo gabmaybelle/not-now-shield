@@ -3,7 +3,7 @@
 	"id": "shieldstrip",
 	"version": "${version}",
 	"name": "Not Now, Shield",
-	"description": "Axes strip, scrape and unwax even with a shield in your off-hand (on 26.3, hoes till and shovels make paths too). When there's nothing to change, the shield raises as normal.",
+	"description": "Axes strip, scrape and unwax even with a shield in your off-hand (on 26.3, hoes till and shovels make paths too). When there's nothing to change, the shield raises as normal. Your shield is also drawn lower, so it covers less of your view.",
 	"authors": [
 		"Gabby"
 	],

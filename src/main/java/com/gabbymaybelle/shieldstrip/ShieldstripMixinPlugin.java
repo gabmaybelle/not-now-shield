@@ -1,7 +1,9 @@
 package com.gabbymaybelle.shieldstrip;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.version.VersionPredicate;
@@ -10,8 +12,9 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 /**
- * Picks the one mixin that fits this Minecraft version: {@code AxeItemMixin} on 26.2,
- * {@code BlockTransformerMixin} on 26.3 and later. Listing both in the mixin config made
+ * Picks the mixins that fit this Minecraft version: {@code AxeItemMixin} on 26.2,
+ * {@code BlockTransformerMixin} on 26.3 and later, and on a game client (never a server) the
+ * shield-lowering mixin for that version's hand renderer. Listing both in the mixin config made
  * Mixin look for the class that isn't there and log an "Error loading class" line; handing
  * it only the right one keeps the log clean.
  */
@@ -36,7 +39,13 @@ public class ShieldstripMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public List<String> getMixins() {
-		return List.of(blockTransformerVersion() ? "BlockTransformerMixin" : "AxeItemMixin");
+		boolean is263 = blockTransformerVersion();
+		List<String> mixins = new ArrayList<>();
+		mixins.add(is263 ? "BlockTransformerMixin" : "AxeItemMixin");
+		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+			mixins.add(is263 ? "FirstPersonHandsAndItemsRendererMixin" : "ItemInHandRendererMixin");
+		}
+		return mixins;
 	}
 
 	/** True on Minecraft 26.3 and later, where tools change blocks through BlockTransformer. */

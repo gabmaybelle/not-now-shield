@@ -20,7 +20,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * With a shield in the off-hand, a right-click with a tool still changes the block, and when
  * there's nothing to change the click is left for the shield. Driven through the server's own
- * player actions, the same path a real click takes. Run with `./gradlew runClientGameTest`
+ * player actions, the same path a real click takes. Then, on the player's screen, a shield is
+ * drawn lower, resting and raised. Run with `./gradlew runClientGameTest`
  * (add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` for 26.3).
  */
 public class ShieldstripClientTest implements FabricClientGameTest {
@@ -52,10 +53,46 @@ public class ShieldstripClientTest implements FabricClientGameTest {
 				player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 				return out.toString();
 			});
+			failures += lowerShield(ctx, world);
 			if (!failures.isEmpty()) {
 				throw new AssertionError("Failed (Minecraft " + (is263 ? "26.3" : "26.2") + "):" + failures);
 			}
 		}
+	}
+
+	/** A shield in the off-hand is drawn through LowerShield, resting and raised; screenshots of both. */
+	private static String lowerShield(ClientGameTestContext ctx, TestSingleplayerContext world) {
+		StringBuilder out = new StringBuilder();
+		world.getServer().runOnServer(server -> server.getPlayerList().getPlayers().getFirst()
+				.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.SHIELD)));
+		ctx.waitFor(mc -> mc.player != null && mc.player.getOffhandItem().is(Items.SHIELD));
+		// Face north, away from the test blocks (east and south), so the hands are clear to see.
+		ctx.runOnClient(mc -> {
+			mc.player.setYRot(180);
+			mc.player.setXRot(0);
+		});
+		ctx.waitTicks(20);
+		int before = ctx.computeOnClient(mc -> LowerShield.lowered);
+		ctx.waitTicks(5);
+		if (ctx.computeOnClient(mc -> LowerShield.lowered) == before) {
+			out.append("\n  a resting shield wasn't drawn lower");
+		}
+		ctx.takeScreenshot("shield-resting");
+
+		// Hold right-click like a player: with an empty main hand, the off-hand shield goes up.
+		ctx.getInput().holdKey(options -> options.keyUse);
+		ctx.waitTicks(10);
+		if (!ctx.computeOnClient(mc -> mc.player.isUsingItem())) {
+			out.append("\n  the shield didn't go up on the player's side");
+		}
+		before = ctx.computeOnClient(mc -> LowerShield.lowered);
+		ctx.waitTicks(5);
+		if (ctx.computeOnClient(mc -> LowerShield.lowered) == before) {
+			out.append("\n  a raised shield wasn't drawn lower");
+		}
+		ctx.takeScreenshot("shield-raised");
+		ctx.getInput().releaseKey(options -> options.keyUse);
+		return out.toString();
 	}
 
 	private static void expectChange(StringBuilder out, ServerPlayer player, ServerLevel level, BlockPos pos, Item tool, Block from, Block to) {
