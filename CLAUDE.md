@@ -30,9 +30,8 @@ it first, and add this session's row before ending.
 
 - **The mod needs only Fabric Loader, not Fabric API.** Fabric API is added for the tests alone
   (`gametestImplementation`); keep it out of the mod's own dependencies.
-- The GitHub repo is github.com/gabmaybelle/not-now-shield. On Gabby's computer its local branch
-  is `public`, pushed to the remote `public` as `main`; the remote `origin` is an old private
-  repo and must not be pushed to.
+- The GitHub repo is github.com/gabmaybelle/not-now-shield: local `main` pushes to `origin`.
+  The remote `shieldstrip-private` is an old private repo and must not be pushed to.
 - Licence: MIT from 1.1.2; versions up to 1.1.1 were CC0-1.0.
 
 ## Working on Gabby's mods (the same in every repo)
