@@ -11,6 +11,10 @@ It also works for modded tools that hand their right-click to the vanilla axe, h
 
 Your shield is also drawn lower on your screen, resting or raised, so it covers less of your view. It still blocks just the same; only the picture moves, and only on your own screen. Modded shields are lowered too.
 
+## Other versions
+
+Minecraft 1.20.1, on Fabric and on Forge, is on the [`1.20.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.20.1), with its download on the [1.20.1 release page](https://github.com/gabmaybelle/not-now-shield/releases/tag/v1.2.0%2B1.20.1). That version only lowers the shield: 1.20.1's axe has no off-hand check, so there is nothing to fix for tools. Downloads for 26.2 and 26.3 are on the [Releases page](https://github.com/gabmaybelle/not-now-shield/releases).
+
 ## How it works
 
 One jar covers both versions. Two mixins make the off-hand check, `playerHasBlockingItemUseIntent`, return `false`:
