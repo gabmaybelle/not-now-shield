@@ -27,13 +27,13 @@ Needs JDK 25 to run Gradle, plus a Java 17 install that Gradle can find (Forge's
 - `./gradlew build`: `fabric/build/libs/not-now-shield-fabric-<version>.jar` and `forge/build/libs/not-now-shield-forge-<version>.jar`; runs the unit test in `common` and on Forge's classes.
 - `./gradlew :fabric:runClient` and `:forge:runClient`: a dev game with the mod.
 
-CI (`.github/workflows/build.yml`) builds both jars and runs the tests, with Java 17 and 25 installed. A live check in a 1.20.1 game (a shield drawn lower, resting and raised) is done by hand before a release.
+CI (`.github/workflows/build.yml`) builds both jars and runs the tests, with Java 17 and 25 installed. A live check in a 1.20.1 game (give a shield with `/give @s shield` and look at the first-person view, with and without the mod) is done by hand before a release.
 
 ## Gotchas
 
 - **The mod needs only Fabric Loader, not Fabric API.** Keep it out of the mod's own dependencies.
 - **Forge refmap.** The shared `shieldstrip.mixins.json` names no refmap; Loom adds `shieldstrip-refmap.json` on Fabric and the Forge build adds the `refmap` line while copying resources.
-- **The mixin target was checked in the build, not in game.** The mixin annotation processor wrote a refmap for `renderArmWithItem` and `PoseStack.pushPose` on both Fabric (intermediary) and Forge (SRG) names, so the target exists; how it draws needs a look in a real 1.20.1 game.
+- **The mixin target.** The mixin annotation processor writes a refmap for `renderArmWithItem` and `PoseStack.pushPose` on both Fabric (intermediary) and Forge (SRG) names. Both jars were also run in a real 1.20.1 world on 2026-10-15: the shield is drawn lower, resting (the raised pose was not looked at).
 - The GitHub repo is github.com/gabmaybelle/not-now-shield: local `main` pushes to `origin`.
   The remote `shieldstrip-private` is an old private repo and must not be pushed to.
 - Licence: MIT from 1.1.2; versions up to 1.1.1 were CC0-1.0.
