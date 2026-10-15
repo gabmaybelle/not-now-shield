@@ -3,7 +3,7 @@
 	"id": "shieldstrip",
 	"version": "${version}",
 	"name": "Not Now, Shield",
-	"description": "Axes strip, scrape and unwax even with a shield in your off-hand (on 26.3, hoes till and shovels make paths too). When there's nothing to change, the shield raises as normal. Your shield is also drawn lower, so it covers less of your view.",
+	"description": "Your shield is drawn lower in first person, resting or raised, so it covers less of your view. It still blocks exactly as before; only the picture moves.",
 	"authors": [
 		"Gabby"
 	],
@@ -14,13 +14,13 @@
 	},
 	"license": "MIT",
 	"icon": "assets/shieldstrip/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"mixins": [
 		"shieldstrip.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.19.5",
-		"minecraft": ">=26.2 <26.4",
-		"java": ">=25"
+		"fabricloader": ">=0.15.0",
+		"minecraft": "1.20.1",
+		"java": ">=17"
 	}
 }

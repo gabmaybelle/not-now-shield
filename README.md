@@ -1,48 +1,43 @@
 # Not Now, Shield
 
-A tiny Fabric mod for Minecraft 26.2 and 26.3: tools change blocks even while a shield is in your off-hand. (Mod ID: `shieldstrip`.)
+Your shield, drawn lower. A tiny mod for Minecraft 1.20.1, on Fabric and Forge. (Mod ID: `shieldstrip`.)
 
-- **26.2:** axes strip logs, scrape copper and remove wax.
-- **26.3:** axes strip, hoes till and shovels make paths.
+This is the Minecraft 1.20.1 version. The 26.2 and 26.3 version (Fabric) is on the `main` branch, where the mod also lets tools change blocks while a shield is in your off-hand.
 
-Vanilla skips these right-click actions whenever a blocking item is in the off-hand (unless you sneak), so the shield goes up instead ([MC-273378](https://bugs.mojang.com/browse/MC/issues/MC-273378)). This mod lets the tool try first. When there is nothing to change, the click falls through and the shield raises as normal.
+Your shield is drawn lower on your screen, resting or raised, so it covers less of your view. It still blocks just the same; only the picture moves, and only on your own screen. Modded shields are lowered too, as long as they are raised like a shield.
 
-It also works for modded tools that hand their right-click to the vanilla axe, hoe or shovel.
+## What it doesn't do on 1.20.1
 
-Your shield is also drawn lower on your screen, resting or raised, so it covers less of your view. It still blocks just the same; only the picture moves, and only on your own screen. Modded shields are lowered too.
+The 26.2 and 26.3 version also lets axes, hoes and shovels work with a shield in your off-hand ([MC-273378](https://bugs.mojang.com/browse/MC/issues/MC-273378)). Minecraft 1.20.1 doesn't have that problem (its axe doesn't check the off-hand), so there is nothing to fix and this version leaves tools alone.
+
+## Requirements
+
+- Minecraft 1.20.1, and Java 17
+- On Fabric: Fabric Loader 0.15 or newer (Fabric API isn't needed)
+- On Forge: Forge 47 or newer
+
+It is client-side only: it works on any server, and the server doesn't need it.
 
 ## How it works
 
-One jar covers both versions. Two mixins make the off-hand check, `playerHasBlockingItemUseIntent`, return `false`:
-
-| Mixin | Minecraft | Target |
-|---|---|---|
-| [`AxeItemMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/AxeItemMixin.java) | 26.2 | `AxeItem` |
-| [`BlockTransformerMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/BlockTransformerMixin.java) | 26.3 | `BlockTransformer` (data-driven axe, hoe and shovel actions) |
-
-Two more, on the game client only, lower the shield in first person through [`LowerShield`](src/main/java/com/gabbymaybelle/shieldstrip/LowerShield.java): each moves the hand down by 0.2 right after the hand renderer starts drawing a hand that holds anything with the `blocks_attacks` component.
-
-| Mixin | Minecraft | Target |
-|---|---|---|
-| [`ItemInHandRendererMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/ItemInHandRendererMixin.java) | 26.2 | `ItemInHandRenderer` |
-| [`FirstPersonHandsAndItemsRendererMixin`](src/main/java/com/gabbymaybelle/shieldstrip/mixin/FirstPersonHandsAndItemsRendererMixin.java) | 26.3 | `FirstPersonHandsAndItemsRenderer` (its new name) |
-
-A small mixin plugin, [`ShieldstripMixinPlugin`](src/main/java/com/gabbymaybelle/shieldstrip/ShieldstripMixinPlugin.java), checks the Minecraft version and applies only the mixins that fit (and the drawing ones only on a game client), so the other targets are never looked up and the log stays clean. All four name their targets by string and are `@Pseudo`, since each class only exists on one of the two versions.
+One client-only mixin, [`ItemInHandRendererMixin`](common/src/main/java/com/gabbymaybelle/shieldstrip/mixin/ItemInHandRendererMixin.java), moves the hand down by 0.2 right after `ItemInHandRenderer` starts drawing it, through [`LowerShield`](common/src/main/java/com/gabbymaybelle/shieldstrip/LowerShield.java), when the item is raised like a shield (the block use animation). Fabric and Forge each have a small part that starts the mod; the rest is shared.
 
 ## Building
 
-Requires JDK 25.
+Requires JDK 25 to run Gradle, and a Java 17 install that Gradle can find (Forge's build tools run on it):
 
 ```
-./gradlew build
+./gradlew build -Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64
 ```
 
-The mod jar is written to `build/libs/not-now-shield-<version>.jar`. Copy it into your instance's `mods` folder.
+(Or `-Dorg.gradle.java.installations.paths=<path to Java 17>`.) The two jars are written to `fabric/build/libs/` and `forge/build/libs/`, named `not-now-shield-fabric-<version>.jar` and `not-now-shield-forge-<version>.jar`. Copy the one for your loader into your instance's `mods` folder. The first Forge build takes a few minutes.
 
-The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source, and `src/main/resources/assets/shieldstrip/icon.png` is it scaled up to 512 pixels with each pixel kept sharp.
+The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source, and `common/src/main/resources/assets/shieldstrip/icon.png` is it scaled up to 512 pixels with each pixel kept sharp.
 
-`./gradlew runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. The tests use Fabric API; the mod itself doesn't.
+`./gradlew build` runs the unit tests (which items count as a shield) in `common` and again on Forge's game classes. 1.20.1 has no Fabric in-game test, so the finished jars are checked in a real game by hand.
 
 ## License
 
 [MIT](LICENSE), from version 1.1.2. Versions up to 1.1.1 were released under CC0-1.0, and copies of those stay CC0.
+
+Not Now, Shield is made by Gabby with help from Claude, an AI assistant.
