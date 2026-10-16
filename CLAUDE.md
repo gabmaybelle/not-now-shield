@@ -1,34 +1,36 @@
 # Not Now, Shield
 
-A tiny Fabric mod for Minecraft 26.2 and 26.3 (mod ID `shieldstrip`): tools change blocks even
+A tiny Fabric and NeoForge mod for Minecraft 26.2 and 26.3 (mod ID `shieldstrip`): tools change blocks even
 while a shield is in the off-hand, and the shield is drawn lower in first person so it covers less
-of the view. One jar covers both versions. See README.md.
+of the view. One jar per loader covers both versions. See README.md.
 
 `PROGRESS.md` says what's done, what's broken and what's next, with a row per session: read
 it first, and add this session's row before ending.
 
 ## Layout
 
-- `src/main/java/com/gabbymaybelle/shieldstrip/`: two mixins (`AxeItemMixin` for 26.2,
+- `common/src/main/java/com/gabbymaybelle/shieldstrip/`: two mixins (`AxeItemMixin` for 26.2,
   `BlockTransformerMixin` for 26.3); two client-only drawing mixins that call `LowerShield`
   (`ItemInHandRendererMixin` for 26.2, `FirstPersonHandsAndItemsRendererMixin` for 26.3, the
   same renderer renamed); and `ShieldstripMixinPlugin`, which applies only the ones that fit the
-  running version, and the drawing ones only on a game client.
-- `src/gametest/`: the client game test (`ShieldstripClientTest`).
+  running version, and the drawing ones only on a game client. It asks the loader whether this is
+  a client and which Minecraft version runs, so each loader has a tiny subclass.
+- `fabric/`: `FabricMixinPlugin`, `fabric.mod.json`, `shieldstrip.mixins.json`, and `src/gametest/` (the client game test, `ShieldstripClientTest`).
+- `neoforge/`: `NeoForgeMixinPlugin`, `neoforge.mods.toml`, `shieldstrip.mixins.json`. No code of its own: a NeoForge mod with no `@Mod` class loads fine.
 - `art/icon.ase`: Gabby's own Aseprite sprite (16x16) for the icon. `icon.png` is it scaled to
   512x512 with nearest-neighbour. Never replace it with generated art; re-export from this file.
 
 ## Build and test
 
-- `./gradlew build`: builds against 26.2 (the jar players get).
-- `./gradlew runClientGameTest`: right-clicks tools with a shield in the off-hand, then holds
+- `./gradlew build`: builds against 26.2 (the jars players get): `fabric/build/libs/not-now-shield-fabric-<version>.jar` and `neoforge/build/libs/not-now-shield-neoforge-<version>.jar`. The unit tests (the version check in the mixin plugin) run on both loaders.
+- `./gradlew :fabric:runClientGameTest` (Fabric only): right-clicks tools with a shield in the off-hand, then holds
   right-click to raise the shield and checks it's drawn lower (screenshots `shield-resting` and
-  `shield-raised` in `build/run/clientGameTest/screenshots/`). Add
-  `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. Run both.
+  `shield-raised` in `fabric/build/run/clientGameTest/screenshots/`). Add
+  `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. Run both. For NeoForge on 26.3 add `-Pneoforge_version=26.3.0.77` to any task.
 
 ## Gotchas
 
-- **The mod needs only Fabric Loader, not Fabric API.** Fabric API is added for the tests alone
+- **The mod needs only the loader (Fabric Loader or NeoForge), not Fabric API.** Fabric API is added for the tests alone
   (`gametestImplementation`); keep it out of the mod's own dependencies.
 - The GitHub repo is github.com/gabmaybelle/not-now-shield: local `main` pushes to `origin`.
   The remote `shieldstrip-private` is an old private repo and must not be pushed to.

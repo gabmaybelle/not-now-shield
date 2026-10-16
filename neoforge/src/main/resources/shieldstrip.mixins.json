@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "com.gabbymaybelle.shieldstrip.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"plugin": "com.gabbymaybelle.shieldstrip.neoforge.NeoForgeMixinPlugin",
+	"mixins": [],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
