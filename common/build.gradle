@@ -1,0 +1,29 @@
+// Loader-neutral code: the mixins, the shield drawing and the mixin plugin. This project is
+// compiled on its own so a Fabric or NeoForge import can't sneak in: only Minecraft, Mixin and
+// the JDK are on the classpath. Nothing here ships as a jar; `fabric` and `neoforge` compile
+// these sources into theirs.
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	// Only for the Mixin annotations and the launch-side classes they need. No Fabric API here.
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Plain unit tests (the version check the mixin plugin uses): `./gradlew :common:test`.
+	testImplementation "org.junit.jupiter:junit-jupiter:5.12.2"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+	useJUnitPlatform()
+}
+
+loom {
+	mods {
+		"shieldstrip" {
+			sourceSet sourceSets.main
+		}
+	}
+}

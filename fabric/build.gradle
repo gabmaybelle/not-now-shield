@@ -1,0 +1,55 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// The common sources are compiled straight into this jar (no common jar to bundle), so the
+// Fabric mod is one file.
+sourceSets.main {
+	java.srcDir project(':common').file('src/main/java')
+	resources.srcDir project(':common').file('src/main/resources')
+}
+
+loom {
+	mods {
+		"shieldstrip" {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+dependencies {
+	// Versions are in gradle.properties. The mod needs only Fabric Loader: no Fabric API.
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+// Client game tests: `./gradlew :fabric:runClientGameTest` starts a real game and right-clicks tools
+// with a shield in the off-hand (add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3`
+// to run them on 26.3). The tests use Fabric API's test helpers; the mod itself still needs only
+// the loader.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "shieldstrip_gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}
+
+dependencies {
+	gametestImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+// not-now-shield-fabric-<version>.jar, the name players download.
+tasks.named('jar') { archiveBaseName = "${rootProject.name}-fabric" }
+tasks.named('sourcesJar') { archiveBaseName = "${rootProject.name}-fabric" }

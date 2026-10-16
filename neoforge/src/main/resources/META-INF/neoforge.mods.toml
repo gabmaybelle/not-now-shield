@@ -1,0 +1,30 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/gabmaybelle/not-now-shield/issues"
+
+[[mods]]
+modId = "shieldstrip"
+version = "${version}"
+displayName = "Not Now, Shield"
+authors = "Gabby"
+displayURL = "https://github.com/gabmaybelle/not-now-shield"
+logoFile = "assets/shieldstrip/icon.png"
+description = '''Axes strip, scrape and unwax even with a shield in your off-hand (on 26.3, hoes till and shovels make paths too). When there's nothing to change, the shield raises as normal. Your shield is also drawn lower, so it covers less of your view.'''
+
+[[mixins]]
+config = "shieldstrip.mixins.json"
+
+[[dependencies.shieldstrip]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.shieldstrip]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.2,26.4)"
+ordering = "NONE"
+side = "BOTH"

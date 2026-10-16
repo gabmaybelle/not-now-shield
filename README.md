@@ -1,6 +1,6 @@
 # Not Now, Shield
 
-A tiny Fabric mod for Minecraft 26.2 and 26.3: tools change blocks even while a shield is in your off-hand. (Mod ID: `shieldstrip`.)
+A tiny Fabric and NeoForge mod for Minecraft 26.2 and 26.3: tools change blocks even while a shield is in your off-hand. (Mod ID: `shieldstrip`.)
 
 - **26.2:** axes strip logs, scrape copper and remove wax.
 - **26.3:** axes strip, hoes till and shovels make paths.
@@ -17,7 +17,7 @@ Minecraft 1.20.1, on Fabric and on Forge, is on the [`1.20.1` branch](https://gi
 
 ## How it works
 
-One jar covers both versions. Two mixins make the off-hand check, `playerHasBlockingItemUseIntent`, return `false`:
+One jar per loader (Fabric and NeoForge) covers both versions. Two mixins make the off-hand check, `playerHasBlockingItemUseIntent`, return `false`:
 
 | Mixin | Minecraft | Target |
 |---|---|---|
@@ -41,11 +41,11 @@ Requires JDK 25.
 ./gradlew build
 ```
 
-The mod jar is written to `build/libs/not-now-shield-<version>.jar`. Copy it into your instance's `mods` folder.
+The mod jars are written to `fabric/build/libs/not-now-shield-fabric-<version>.jar` and `neoforge/build/libs/not-now-shield-neoforge-<version>.jar`. Copy the one for your loader into your instance's `mods` folder.
 
 The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source, and `src/main/resources/assets/shieldstrip/icon.png` is it scaled up to 512 pixels with each pixel kept sharp.
 
-`./gradlew runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. The tests use Fabric API; the mod itself doesn't.
+`./gradlew :fabric:runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. The tests use Fabric API; the mod itself doesn't. There is no automated game test for the NeoForge jar yet.
 
 ## License
 
