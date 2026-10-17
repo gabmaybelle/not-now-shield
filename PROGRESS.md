@@ -6,9 +6,9 @@ which checks fail, code put back), what was learned, and what was deliberately n
 
 ## Where things stand
 
-- **Done:** Not Now, Shield 1.3.0 for Minecraft 1.21.1, on Fabric and NeoForge (mod ID `shieldstrip`; branch `1.21.1`, not released yet): axes strip, scrape and unwax with a shield in the off-hand, and the shield is drawn lower in first person. A Fabric client game test and a NeoForge in-game test, CI runs both.
+- **Done:** Not Now, Shield 1.3.0 for Minecraft 1.21.1, on Fabric and NeoForge (mod ID `shieldstrip`; branch `1.21.1`, released as `v1.3.0+1.21.1` on 2026-10-16): axes strip, scrape and unwax with a shield in the off-hand, and the shield is drawn lower in first person. A Fabric client game test and a NeoForge in-game test, CI runs both.
 - **Broken:** Nothing known as of this writing (not re-verified).
-- **Next:** Release as `v1.3.0+1.21.1` once Gabby says so. The 26.x line is on `main`, 1.20.1 on its own branch.
+- **Next:** Gabby uploads the two 1.21.1 files to CurseForge and Modrinth. The 26.x line is on `main`, 1.20.1 on its own branch.
 
 ## Log
 
