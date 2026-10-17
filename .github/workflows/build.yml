@@ -1,7 +1,7 @@
-# Builds the mod on every push and pull request against each Minecraft version it supports, and
-# runs the in-game test (src/gametest) on each on a virtual display, since a vanilla change can
-# compile fine and still break in game. The Fabric and NeoForge jars built against 26.2 (the ones players get, for both
-# versions) is attached to each run under "Artifacts", with each version's screenshots alongside.
+# Builds the Fabric and NeoForge jars for Minecraft 1.21.1 on every push and pull request, and runs
+# both in-game tests (Fabric's in fabric/src/gametest, NeoForge's in neoforge/src/clienttest) on a
+# virtual display, since a vanilla change can compile fine and still break in game. The two jars
+# are attached to each run under "Artifacts", with the screenshots alongside.
 
 name: build
 on: [pull_request, push]
@@ -18,10 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - minecraft: '26.2'
+          - minecraft: '1.21.1'
             gradle_args: ''
-          - minecraft: '26.3'
-            gradle_args: '-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3 -Pneoforge_version=26.3.0.77'
     name: build (Minecraft ${{ matrix.minecraft }})
     steps:
       - name: checkout repository
@@ -32,6 +30,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '25'
+          # The code is compiled for Java 21 (1.21.1's) by this newer JDK.
           distribution: 'microsoft'
       - name: setup gradle (with caching)
         uses: gradle/actions/setup-gradle@v6
@@ -39,21 +38,13 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build ${{ matrix.gradle_args }}
-      - name: install EGL
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libegl1 libegl-mesa0
       - name: run game test
-        # From 26.3 the game asks for an sRGB-capable window, which Xvfb's GLX can't give, so the
-        # game would hang at startup. Mesa's EGL can; SDL uses it with this set.
-        env:
-          SDL_VIDEO_FORCE_EGL: '1'
         timeout-minutes: 15
         run: xvfb-run -a ./gradlew :fabric:runClientGameTest ${{ matrix.gradle_args }}
       - name: run NeoForge game test
         # The NeoForge jar's checks (neoforge/src/clienttest). A failed check crashes the game, which
         # fails this step; the crash report is uploaded with the screenshots.
         if: always()
-        env:
-          SDL_VIDEO_FORCE_EGL: '1'
         timeout-minutes: 12
         run: xvfb-run -a ./gradlew :neoforge:runClientTest ${{ matrix.gradle_args }}
       - name: capture game test screenshots
@@ -67,7 +58,6 @@ jobs:
             neoforge/build/run/clientTest/crash-reports/
           if-no-files-found: ignore
       - name: capture build artifacts
-        if: matrix.minecraft == '26.2'
         uses: actions/upload-artifact@v7
         with:
           name: Artifacts

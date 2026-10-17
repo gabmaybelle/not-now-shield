@@ -1,9 +1,8 @@
 package com.gabbymaybelle.shieldstrip;
 
-import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
-import net.fabricmc.loader.api.FabricLoader;
+import com.gabbymaybelle.shieldstrip.harness.ClientGameTest;
+import com.gabbymaybelle.shieldstrip.harness.ClientGameTestContext;
+import com.gabbymaybelle.shieldstrip.harness.TestSingleplayerContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -21,17 +20,13 @@ import net.minecraft.world.phys.Vec3;
  * With a shield in the off-hand, a right-click with a tool still changes the block, and when
  * there's nothing to change the click is left for the shield. Driven through the server's own
  * player actions, the same path a real click takes. Then, on the player's screen, a shield is
- * drawn lower, resting and raised. Run with `./gradlew runClientGameTest`
- * (add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` for 26.3).
+ * drawn lower, resting and raised. Run with `./gradlew :fabric:runClientGameTest`.
  */
-public class ShieldstripClientTest implements FabricClientGameTest {
+public class ShieldstripClientTest implements ClientGameTest {
 	@Override
 	public void runTest(ClientGameTestContext ctx) {
-		boolean is263 = FabricLoader.getInstance().getModContainer("minecraft").orElseThrow()
-				.getMetadata().getVersion().getFriendlyString().startsWith("26.3");
 		try (TestSingleplayerContext world = ctx.worldBuilder().create()) {
-			world.getConnection().waitForChunksRender();
-			world.getServer().runCommand("gamemode survival @a");
+			world.waitForChunksRender();
 			String failures = world.getServer().computeOnServer(server -> {
 				ServerLevel level = server.overworld();
 				ServerPlayer player = server.getPlayerList().getPlayers().getFirst();
@@ -40,11 +35,9 @@ public class ShieldstripClientTest implements FabricClientGameTest {
 				player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.SHIELD));
 
 				expectChange(out, player, level, base, Items.IRON_AXE, Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG);
-				if (is263) {
-					// 26.3 moved hoes and shovels onto the same check, so they're covered too.
-					expectChange(out, player, level, base.east(), Items.IRON_HOE, Blocks.DIRT, Blocks.FARMLAND);
-					expectChange(out, player, level, base.east(2), Items.IRON_SHOVEL, Blocks.GRASS_BLOCK, Blocks.DIRT_PATH);
-				}
+				// Hoes and shovels have no off-hand check on 1.21.1, so they work with or without the mod.
+				expectChange(out, player, level, base.east(), Items.IRON_HOE, Blocks.DIRT, Blocks.FARMLAND);
+				expectChange(out, player, level, base.east(2), Items.IRON_SHOVEL, Blocks.GRASS_BLOCK, Blocks.DIRT_PATH);
 				// Nothing to strip: the click isn't taken, so the game goes on to raise the shield.
 				if (use(player, level, base.south(), Items.IRON_AXE, Blocks.STONE)) {
 					out.append("\n  an axe on stone took the click, so the shield wouldn't go up");
@@ -55,7 +48,7 @@ public class ShieldstripClientTest implements FabricClientGameTest {
 			});
 			failures += lowerShield(ctx, world);
 			if (!failures.isEmpty()) {
-				throw new AssertionError("Failed (Minecraft " + (is263 ? "26.3" : "26.2") + "):" + failures);
+				throw new AssertionError("Failed (Minecraft 1.21.1):" + failures);
 			}
 		}
 	}
@@ -65,7 +58,7 @@ public class ShieldstripClientTest implements FabricClientGameTest {
 		StringBuilder out = new StringBuilder();
 		world.getServer().runOnServer(server -> server.getPlayerList().getPlayers().getFirst()
 				.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.SHIELD)));
-		ctx.waitFor(mc -> mc.player != null && mc.player.getOffhandItem().is(Items.SHIELD));
+		ctx.waitFor(mc -> mc.player != null && mc.player.getOffhandItem().is(Items.SHIELD), 200);
 		// Face north, away from the test blocks (east and south), so the hands are clear to see.
 		ctx.runOnClient(mc -> {
 			mc.player.setYRot(180);
@@ -80,7 +73,7 @@ public class ShieldstripClientTest implements FabricClientGameTest {
 		ctx.takeScreenshot("shield-resting");
 
 		// Hold right-click like a player: with an empty main hand, the off-hand shield goes up.
-		ctx.getInput().holdKey(options -> options.keyUse);
+		ctx.runOnClient(mc -> mc.options.keyUse.setDown(true));
 		ctx.waitTicks(10);
 		if (!ctx.computeOnClient(mc -> mc.player.isUsingItem())) {
 			out.append("\n  the shield didn't go up on the player's side");
@@ -91,7 +84,7 @@ public class ShieldstripClientTest implements FabricClientGameTest {
 			out.append("\n  a raised shield wasn't drawn lower");
 		}
 		ctx.takeScreenshot("shield-raised");
-		ctx.getInput().releaseKey(options -> options.keyUse);
+		ctx.runOnClient(mc -> mc.options.keyUse.setDown(false));
 		return out.toString();
 	}
 

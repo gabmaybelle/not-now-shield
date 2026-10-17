@@ -1,5 +1,5 @@
 plugins {
-	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'fabric-loom' version "${loom_version}"
 }
 
 // The common sources are compiled straight into this jar (no common jar to bundle), so the
@@ -10,6 +10,10 @@ sourceSets.main {
 }
 
 loom {
+	// Named for this mod: the default, fabric-refmap.json, would clash with any other mod built the same way.
+	mixin {
+		defaultRefmapName = "shieldstrip-refmap.json"
+	}
 	mods {
 		"shieldstrip" {
 			sourceSet sourceSets.main
@@ -20,7 +24,11 @@ loom {
 dependencies {
 	// Versions are in gradle.properties. The mod needs only Fabric Loader: no Fabric API.
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	// 1.21.1 ships obfuscated: the code is written in the official Mojang names and Loom remaps.
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	// For the game tests' tick event only: the mod itself needs just the loader (its fabric.mod.json asks for nothing else).
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
 processResources {
@@ -32,24 +40,40 @@ processResources {
 	}
 }
 
-// Client game tests: `./gradlew :fabric:runClientGameTest` starts a real game and right-clicks tools
-// with a shield in the off-hand (add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3`
-// to run them on 26.3). The tests use Fabric API's test helpers; the mod itself still needs only
-// the loader.
-fabricApi {
-	configureTests {
-		createSourceSet = true
-		modId = "shieldstrip_gametest"
-		enableGameTests = false
-		enableClientGameTests = true
-		eula = true
+// Client game tests: `./gradlew :fabric:runClientGameTest` starts a real game and plays through
+// the checks in src/gametest. Nothing there ships in the jar. Fabric's client game test API
+// doesn't exist for 1.21.1, so the harness is the test's own (src/gametest/.../harness) and the
+// run is a plain client run with the test source set as a second mod. The tests use Fabric API's
+// tick event; the mod itself still needs only the loader.
+sourceSets {
+	gametest {
+		compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+		runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
 	}
 }
 
-dependencies {
-	gametestImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+loom {
+	mods {
+		"shieldstrip_gametest" {
+			sourceSet sourceSets.gametest
+		}
+	}
+	runs {
+		clientGameTest {
+			client()
+			name = "Client Game Test"
+			source sourceSets.gametest
+			runDir "build/run/clientGameTest"
+			property "shieldstrip.gametest", "true"
+			// A fixed window so the screenshots are the same size on every machine.
+			programArgs "--width", "1280", "--height", "720"
+			ideConfigGenerated false
+		}
+	}
 }
 
 // not-now-shield-fabric-<version>.jar, the name players download.
 tasks.named('jar') { archiveBaseName = "${rootProject.name}-fabric" }
 tasks.named('sourcesJar') { archiveBaseName = "${rootProject.name}-fabric" }
+tasks.named('remapJar') { archiveBaseName = "${rootProject.name}-fabric" }
+tasks.named('remapSourcesJar') { archiveBaseName = "${rootProject.name}-fabric" }

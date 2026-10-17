@@ -1,49 +1,34 @@
 # Not Now, Shield
 
-A tiny Fabric and NeoForge mod for Minecraft 26.2 and 26.3: tools change blocks even while a shield is in your off-hand. (Mod ID: `shieldstrip`.)
+A tiny Fabric and NeoForge mod for Minecraft 1.21.1: axes strip logs, scrape copper and remove wax even while a shield is in your off-hand, and your shield is drawn lower so it covers less of your view. (Mod ID: `shieldstrip`.)
 
-- **26.2:** axes strip logs, scrape copper and remove wax.
-- **26.3:** axes strip, hoes till and shovels make paths.
+This is the Minecraft 1.21.1 version. The 26.2 and 26.3 version is on the `main` branch, where hoes and shovels need the same fix.
 
-Vanilla skips these right-click actions whenever a blocking item is in the off-hand (unless you sneak), so the shield goes up instead ([MC-273378](https://bugs.mojang.com/browse/MC/issues/MC-273378)). This mod lets the tool try first. When there is nothing to change, the click falls through and the shield raises as normal.
+Vanilla axes skip these right-click actions whenever a shield is in the off-hand (unless you sneak), so the shield goes up instead ([MC-273378](https://bugs.mojang.com/browse/MC/issues/MC-273378)). This mod lets the axe try first. When there is nothing to change, the click falls through and the shield raises as normal. Hoes and shovels in 1.21.1 never had this problem, so they are left alone. It also works for modded axes that hand their right-click to the vanilla axe.
 
-It also works for modded tools that hand their right-click to the vanilla axe, hoe or shovel.
-
-Your shield is also drawn lower on your screen, resting or raised, so it covers less of your view. It still blocks just the same; only the picture moves, and only on your own screen. Modded shields are lowered too.
+Your shield is also drawn lower on your screen, resting or raised, so it covers less of your view. It still blocks just the same; only the picture moves, and only on your own screen. Modded shields are lowered too, as long as they are raised like a shield.
 
 ## Requirements
 
-- Minecraft 26.2 or 26.3
-- Fabric: Fabric Loader 0.19.5 or newer. No Fabric API needed.
-- NeoForge: NeoForge 26.2 or newer.
+- Minecraft 1.21.1, and Java 21
+- Fabric: Fabric Loader 0.15 or newer. No Fabric API needed.
+- NeoForge: NeoForge 21.1 or newer.
 
-Pick the `fabric` or `neoforge` file for your loader. For multiplayer, install it on the server and on each player's game, so the shield and the tool agree on what happens. The lower shield works on your own game even on a server without the mod.
+Pick the `fabric` or `neoforge` file for your loader. For multiplayer, install it on the server and on each player's game, so the axe and the shield agree on what happens. The lower shield works on your own game even on a server without the mod.
 
 ## Other versions
 
-Minecraft 1.20.1, on Fabric and on Forge, is on the [`1.20.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.20.1), with its download on the [1.20.1 release page](https://github.com/gabmaybelle/not-now-shield/releases/tag/v1.2.0%2B1.20.1). That version only lowers the shield: 1.20.1's axe has no off-hand check, so there is nothing to fix for tools. Downloads for 26.2 and 26.3 are on the [Releases page](https://github.com/gabmaybelle/not-now-shield/releases).
+Minecraft 1.20.1, on Fabric and on Forge, is on the [`1.20.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.20.1) (it only lowers the shield: 1.20.1's axe has no off-hand check). Downloads for 26.2 and 26.3 are on the [Releases page](https://github.com/gabmaybelle/not-now-shield/releases).
 
 ## How it works
 
-One jar per loader (Fabric and NeoForge) covers both versions. Two mixins make the off-hand check, `playerHasBlockingItemUseIntent`, return `false`:
+[`AxeItemMixin`](common/src/main/java/com/gabbymaybelle/shieldstrip/mixin/AxeItemMixin.java) makes `AxeItem.playerHasShieldUseIntent`, the off-hand check, return `false`.
 
-| Mixin | Minecraft | Target |
-|---|---|---|
-| [`AxeItemMixin`](common/src/main/java/com/gabbymaybelle/shieldstrip/mixin/AxeItemMixin.java) | 26.2 | `AxeItem` |
-| [`BlockTransformerMixin`](common/src/main/java/com/gabbymaybelle/shieldstrip/mixin/BlockTransformerMixin.java) | 26.3 | `BlockTransformer` (data-driven axe, hoe and shovel actions) |
-
-Two more, on the game client only, lower the shield in first person through [`LowerShield`](common/src/main/java/com/gabbymaybelle/shieldstrip/LowerShield.java): each moves the hand down by 0.2 right after the hand renderer starts drawing a hand that holds anything with the `blocks_attacks` component.
-
-| Mixin | Minecraft | Target |
-|---|---|---|
-| [`ItemInHandRendererMixin`](common/src/main/java/com/gabbymaybelle/shieldstrip/mixin/ItemInHandRendererMixin.java) | 26.2 | `ItemInHandRenderer` |
-| [`FirstPersonHandsAndItemsRendererMixin`](common/src/main/java/com/gabbymaybelle/shieldstrip/mixin/FirstPersonHandsAndItemsRendererMixin.java) | 26.3 | `FirstPersonHandsAndItemsRenderer` (its new name) |
-
-A small mixin plugin, [`ShieldstripMixinPlugin`](common/src/main/java/com/gabbymaybelle/shieldstrip/ShieldstripMixinPlugin.java), checks the Minecraft version and applies only the mixins that fit (and the drawing ones only on a game client), so the other targets are never looked up and the log stays clean. All four name their targets by string and are `@Pseudo`, since each class only exists on one of the two versions.
+[`ItemInHandRendererMixin`](common/src/main/java/com/gabbymaybelle/shieldstrip/mixin/ItemInHandRendererMixin.java), on the game client only, moves a hand down by 0.2 right after the hand renderer starts drawing it, through [`LowerShield`](common/src/main/java/com/gabbymaybelle/shieldstrip/LowerShield.java), when the item in it is raised like a shield (the `BLOCK` use animation).
 
 ## Building
 
-Requires JDK 25.
+Requires JDK 21 or newer (the code is compiled for Java 21).
 
 ```
 ./gradlew build
@@ -53,8 +38,10 @@ The mod jars are written to `fabric/build/libs/not-now-shield-fabric-<version>.j
 
 The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source, and `common/src/main/resources/assets/shieldstrip/icon.png` is it scaled up to 512 pixels with each pixel kept sharp.
 
-`./gradlew :fabric:runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3 (and `-Pneoforge_version=26.3.0.77` to build the NeoForge jar against 26.3). The tests use Fabric API; the mod itself doesn't. There is no automated game test for the NeoForge jar yet.
+`./gradlew :fabric:runClientGameTest` and `./gradlew :neoforge:runClientTest` start the game and right-click an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). Fabric's game test API doesn't exist for 1.21.1, so the Fabric test brings its own small harness. The tests use Fabric API's tick event; the mod itself doesn't.
 
 ## License
 
 [MIT](LICENSE), from version 1.1.2. Versions up to 1.1.1 were released under CC0-1.0, and copies of those stay CC0.
+
+Not Now, Shield is made by Gabby with help from Claude, an AI assistant.

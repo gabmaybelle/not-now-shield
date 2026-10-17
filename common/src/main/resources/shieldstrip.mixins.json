@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.gabbymaybelle.shieldstrip.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"AxeItemMixin"
+	],
+	"client": [
+		"ItemInHandRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

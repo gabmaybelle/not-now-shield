@@ -1,39 +1,27 @@
 # Not Now, Shield
 
-A tiny Fabric and NeoForge mod for Minecraft 26.2 and 26.3 (mod ID `shieldstrip`): tools change blocks even
-while a shield is in the off-hand, and the shield is drawn lower in first person so it covers less
-of the view. One jar per loader covers both versions. See README.md.
+A tiny Fabric and NeoForge mod for Minecraft 1.21.1 (this branch; `main` is 26.2 and 26.3, `1.20.1` is Fabric and Forge; mod ID `shieldstrip`): axes strip, scrape and unwax even while a shield is in the off-hand, and the shield is drawn lower in first person so it covers less of the view. See README.md.
 
 `PROGRESS.md` says what's done, what's broken and what's next, with a row per session: read
 it first, and add this session's row before ending.
 
 ## Layout
 
-- `common/src/main/java/com/gabbymaybelle/shieldstrip/`: two mixins (`AxeItemMixin` for 26.2,
-  `BlockTransformerMixin` for 26.3); two client-only drawing mixins that call `LowerShield`
-  (`ItemInHandRendererMixin` for 26.2, `FirstPersonHandsAndItemsRendererMixin` for 26.3, the
-  same renderer renamed); and `ShieldstripMixinPlugin`, which applies only the ones that fit the
-  running version, and the drawing ones only on a game client. It asks the loader whether this is
-  a client and which Minecraft version runs, so each loader has a tiny subclass.
-- `fabric/`: `FabricMixinPlugin`, `fabric.mod.json`, `shieldstrip.mixins.json`, and `src/gametest/` (the client game test, `ShieldstripClientTest`).
-- `neoforge/`: `NeoForgeMixinPlugin`, `neoforge.mods.toml`, `shieldstrip.mixins.json`. No code of its own: a NeoForge mod with no `@Mod` class loads fine.
+- `common/src/main/java/com/gabbymaybelle/shieldstrip/`: `AxeItemMixin` (makes the axe's off-hand shield check, `playerHasShieldUseIntent`, return false), the client-only `ItemInHandRendererMixin` that calls `LowerShield`, and `shieldstrip.mixins.json` in the resources. Hoes and shovels have no such check on 1.21.1.
+- `fabric/`: `fabric.mod.json`, and `src/gametest/` (the client game test `ShieldstripClientTest` plus its own small harness in `harness/`, since Fabric's client game test API doesn't exist for 1.21.1).
+- `neoforge/`: `neoforge.mods.toml` and `src/clienttest/` (the in-game test). No code of its own: a NeoForge mod with no `@Mod` class loads fine.
 - `art/icon.ase`: Gabby's own Aseprite sprite (16x16) for the icon. `icon.png` is it scaled to
   512x512 with nearest-neighbour. Never replace it with generated art; re-export from this file.
 
 ## Build and test
 
-- `./gradlew build`: builds against 26.2 (the jars players get): `fabric/build/libs/not-now-shield-fabric-<version>.jar` and `neoforge/build/libs/not-now-shield-neoforge-<version>.jar`. The unit tests (the version check in the mixin plugin) run on both loaders.
-- `./gradlew :fabric:runClientGameTest` (Fabric only): right-clicks tools with a shield in the off-hand, then holds
-  right-click to raise the shield and checks it's drawn lower (screenshots `shield-resting` and
-  `shield-raised` in `fabric/build/run/clientGameTest/screenshots/`). Add
-  `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3. Run both. For NeoForge on 26.3 add `-Pneoforge_version=26.3.0.77` to any task.
+- `./gradlew build`: Java 21, official Mojang names (Loom remaps for Fabric): `fabric/build/libs/not-now-shield-fabric-<version>.jar` and `neoforge/build/libs/not-now-shield-neoforge-<version>.jar`. The unit tests run on both loaders.
+- `./gradlew :fabric:runClientGameTest` and `./gradlew :neoforge:runClientTest` open a real game and run the same checks (axe strips with a shield in the off-hand, hoe and shovel as vanilla, axe on stone leaves the click, shield drawn lowered resting and raised).
 
 ## Gotchas
 
-- **The mod needs only the loader (Fabric Loader or NeoForge), not Fabric API.** Fabric API is added for the tests alone
-  (`gametestImplementation`); keep it out of the mod's own dependencies.
-- The GitHub repo is github.com/gabmaybelle/not-now-shield: local `main` pushes to `origin`.
-  The remote `shieldstrip-private` is an old private repo and must not be pushed to.
+- **The mod needs only the loader (Fabric Loader or NeoForge), not Fabric API.** Fabric API is on the Fabric build only for the game test's tick event.
+- The GitHub repo is github.com/gabmaybelle/not-now-shield: this branch pushes to `origin` as `1.21.1`.
 - Licence: MIT from 1.1.2; versions up to 1.1.1 were CC0-1.0.
 
 ## Gabby's mods: who does what (the same in every repo)
@@ -103,8 +91,7 @@ or test names. Check the diff for these before every push.
   put the code back. A check that compares against the setting it tests proves nothing.
 - A data change (worldgen, loot, a template, a pack's mod list) gets the same proof: run the part
   of the test that sees it, and quote the numbers in the progress row.
-- On Linux without a screen, run game tests under `xvfb-run -a`. 26.3 also needs
-  `SDL_VIDEO_FORCE_EGL=1` with `libegl1 libegl-mesa0` installed, or the game hangs at startup.
+- On Linux without a screen, run game tests under `xvfb-run -a`.
 
 **Writing.**
 - README and CHANGELOG are for players: plain, friendly, no jargon. New player-facing changes
@@ -112,6 +99,5 @@ or test names. Check the diff for these before every push.
 - Keep the credit line: "made by Gabby with help from Claude, an AI assistant".
 - Gabby publishes on Modrinth herself. Don't upload anything there.
 
-**Minecraft.** Fabric on Minecraft 26.3 (Mojang names; Loom 1.18.4, Java 25). Vanilla names
-changed a lot in 26.x: check the merged jar rather than older docs (for example `iron_chain`,
-`pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).
+**Minecraft.** Minecraft 1.21.1 (official Mojang names; Loom 1.18.4, Java 21). Check the real
+jar (`javap`) rather than older docs when a name looks different from other versions.

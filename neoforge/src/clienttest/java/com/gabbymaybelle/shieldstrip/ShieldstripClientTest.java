@@ -21,11 +21,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.loading.FMLLoader;
 
 /**
  * The NeoForge jar's in-game test: the same checks as the Fabric game test (fabric/src/gametest).
- * Tools change blocks with a shield in the off-hand (axes; on 26.3 hoes and shovels too), an axe
+ * Tools change blocks with a shield in the off-hand (axes, and hoes and shovels as vanilla), an axe
  * on stone leaves the click for the shield, and a shield is drawn lowered, resting and raised.
  */
 final class ShieldstripClientTest {
@@ -36,7 +35,6 @@ final class ShieldstripClientTest {
 	}
 
 	static void steps() {
-		boolean is263 = ShieldstripMixinPlugin.blockTransformerVersion(FMLLoader.getCurrent().getVersionInfo().mcVersion());
 		createWorld("shieldstrip-clienttest");
 		command("gamemode survival @a");
 
@@ -47,11 +45,9 @@ final class ShieldstripClientTest {
 			StringBuilder out = new StringBuilder();
 			player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.SHIELD));
 			expectChange(out, player, level, base, Items.IRON_AXE, Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG);
-			if (is263) {
-				// 26.3 moved hoes and shovels onto the same check, so they're covered too.
-				expectChange(out, player, level, base.east(), Items.IRON_HOE, Blocks.DIRT, Blocks.FARMLAND);
-				expectChange(out, player, level, base.east(2), Items.IRON_SHOVEL, Blocks.GRASS_BLOCK, Blocks.DIRT_PATH);
-			}
+			// Hoes and shovels have no off-hand check on 1.21.1, so they work with or without the mod.
+			expectChange(out, player, level, base.east(), Items.IRON_HOE, Blocks.DIRT, Blocks.FARMLAND);
+			expectChange(out, player, level, base.east(2), Items.IRON_SHOVEL, Blocks.GRASS_BLOCK, Blocks.DIRT_PATH);
 			// Nothing to strip: the click isn't taken, so the game goes on to raise the shield.
 			if (use(player, level, base.south(), Items.IRON_AXE, Blocks.STONE)) {
 				out.append("\n  an axe on stone took the click, so the shield wouldn't go up");
