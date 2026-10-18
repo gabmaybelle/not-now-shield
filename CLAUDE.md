@@ -17,8 +17,9 @@ Three Gradle projects, like Nightfall Clock's 1.20.1 branch: `common` holds ever
 - `forge/`: `ShieldstripForge` (an empty `@Mod` class, since Forge needs one), `META-INF/mods.toml`, and `pack.mcmeta` (Forge shows a warning screen without it).
 - `art/icon.ase`: Gabby's own Aseprite sprite (16x16) for the icon. `icon.png` is it scaled to
   512x512 with nearest-neighbour. Never replace it with generated art; re-export from this file.
-
-There is no in-game test mod on this branch: 1.20.1 has no Fabric client game test.
+- `fabric/src/gametest/`: the Fabric in-game test. 1.20.1 has no Fabric client game test API, so `harness/` is a small one of our own (copied from Pocket List's 1.20.1 branch); it uses Fabric API's tick event, which is on the test's classpath only (`modGametestImplementation`), never the mod's.
+- `forge/src/clienttest/`: the Forge in-game test (`ClientTest` runs steps a tick at a time; a failed check crashes the game).
+- Both check the same things: an axe still strips a log with a shield in the off-hand and leaves a click on stone for the shield (vanilla 1.20.1 behaviour the mod must not change), and the shield is drawn lower, resting and raised (`LowerShield.lowered` counts the hook's runs).
 
 ## Build and test
 
@@ -26,8 +27,9 @@ Needs JDK 25 to run Gradle, plus a Java 17 install that Gradle can find (Forge's
 
 - `./gradlew build`: `fabric/build/libs/not-now-shield-fabric-<version>.jar` and `forge/build/libs/not-now-shield-forge-<version>.jar`; runs the unit test in `common` and on Forge's classes.
 - `./gradlew :fabric:runClient` and `:forge:runClient`: a dev game with the mod.
+- `./gradlew :fabric:runClientGameTest` and `:forge:runClientTest`: the in-game tests. Each opens a game window for a minute or two and closes it; screenshots land in `build/run/.../screenshots`.
 
-CI (`.github/workflows/build.yml`) builds both jars and runs the tests, with Java 17 and 25 installed. A live check in a 1.20.1 game (give a shield with `/give @s shield` and look at the first-person view, with and without the mod) is done by hand before a release.
+CI (`.github/workflows/build.yml`) builds both jars, runs the unit tests and then both in-game tests under `xvfb-run`, with Java 17 and 25 installed. A live check in a 1.20.1 game (give a shield with `/give @s shield` and look at the first-person view, with and without the mod) is done by hand before a release.
 
 ## Gotchas
 

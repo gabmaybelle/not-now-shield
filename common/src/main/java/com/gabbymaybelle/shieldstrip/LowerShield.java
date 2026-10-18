@@ -13,6 +13,9 @@ public final class LowerShield {
 	/** How far down a shield is drawn, in the hand renderer's units (the hand sits at -0.52). */
 	public static final float DROP = 0.2F;
 
+	/** Shields drawn lowered so far; the in-game tests read it to see the hook ran. */
+	public static int lowered;
+
 	private LowerShield() {
 	}
 
@@ -25,6 +28,7 @@ public final class LowerShield {
 	public static void apply(ItemStack stack, PoseStack pose) {
 		if (blocks(stack.getUseAnimation())) {
 			pose.translate(0.0F, -DROP, 0.0F);
+			lowered++;
 		}
 	}
 }
