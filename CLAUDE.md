@@ -23,7 +23,7 @@ Three Gradle projects, like Nightfall Clock's 1.20.1 branch: `common` holds ever
 
 ## Build and test
 
-Needs JDK 25 to run Gradle, plus a Java 17 install that Gradle can find (Forge's tools run on it): set `-Dorg.gradle.java.installations.paths=<path to Java 17>` or `-Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64`. The code is compiled for Java 17 whichever JDK compiles it.
+Needs JDK 25 to run Gradle, plus a Java 17 for Forge's tools: Gradle finds an installed one or downloads one itself (the foojay plugin in `settings.gradle`), so no Java path needs passing. CI still points it at the runner's with `-Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64`. The code is compiled for Java 17 whichever JDK compiles it.
 
 - `./gradlew build`: `fabric/build/libs/not-now-shield-fabric-<version>.jar` and `forge/build/libs/not-now-shield-forge-<version>.jar`; runs the unit test in `common` and on Forge's classes.
 - `./gradlew :fabric:runClient` and `:forge:runClient`: a dev game with the mod.
