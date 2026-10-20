@@ -6,7 +6,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-client-gametest": [
-			"com.gabbymaybelle.shieldstrip.ShieldstripClientTest"
+			"com.gabbymaybelle.shieldstrip.ShieldstripClientTest",
+			"com.gabbymaybelle.shieldstrip.VideoTour"
 		]
 	},
 	"depends": {
