@@ -1,6 +1,10 @@
 # Not Now, Shield
 
-A tiny Fabric and NeoForge mod for Minecraft 26.2 and 26.3: tools change blocks even while a shield is in your off-hand. (Mod ID: `shieldstrip`.)
+Your shield stops getting in the way: tools change blocks even while a shield is in your off-hand, and the shield is drawn lower so it covers less of your view.
+
+For Fabric and NeoForge on Minecraft 26.2, 26.3 and 1.21.1, and Fabric and Forge on 1.20.1 (the lower shield only there). Download it from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/not-now-shield). (Mod ID: `shieldstrip`.)
+
+On Minecraft 26.2 and 26.3:
 
 - **26.2:** axes strip logs, scrape copper and remove wax.
 - **26.3:** axes strip, hoes till and shovels make paths.
@@ -21,7 +25,10 @@ Pick the `fabric` or `neoforge` file for your loader. For multiplayer, install i
 
 ## Other versions
 
-Minecraft 1.20.1, on Fabric and on Forge, is on the [`1.20.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.20.1), with its download on the [1.20.1 release page](https://github.com/gabmaybelle/not-now-shield/releases/tag/v1.2.0%2B1.20.1). That version only lowers the shield: 1.20.1's axe has no off-hand check, so there is nothing to fix for tools. Downloads for 26.2 and 26.3 are on the [Releases page](https://github.com/gabmaybelle/not-now-shield/releases).
+- Minecraft 1.21.1, on Fabric and NeoForge, is on the [`1.21.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.21.1). Only axes need the fix there: 1.21.1's hoes and shovels already work with a shield.
+- Minecraft 1.20.1, on Fabric and Forge, is on the [`1.20.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.20.1). That version only lowers the shield: 1.20.1's axe has no off-hand check, so there is nothing to fix for tools.
+
+Every version's download is on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/not-now-shield) and the [Releases page](https://github.com/gabmaybelle/not-now-shield/releases).
 
 ## How it works
 
@@ -55,6 +62,8 @@ The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source,
 
 `./gradlew :fabric:runClientGameTest` starts the game and right-clicks an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). It runs on 26.2; add `-Pminecraft_version=26.3 -Pfabric_api_version=0.162.0+26.3` to run it on 26.3 (and `-Pneoforge_version=26.3.0.77` to build the NeoForge jar against 26.3). The tests use Fabric API; the mod itself doesn't. There is no automated game test for the NeoForge jar yet.
 
-## License
+## Licence
 
 [MIT](LICENSE), from version 1.1.2. Versions up to 1.1.1 were released under CC0-1.0, and copies of those stay CC0.
+
+Not Now, Shield is made by Gabby with help from Claude, an AI assistant.
