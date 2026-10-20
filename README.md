@@ -1,6 +1,8 @@
 # Not Now, Shield
 
-A tiny Fabric and NeoForge mod for Minecraft 1.21.1: axes strip logs, scrape copper and remove wax even while a shield is in your off-hand, and your shield is drawn lower so it covers less of your view. (Mod ID: `shieldstrip`.)
+Your shield stops getting in the way: axes strip logs, scrape copper and remove wax even while a shield is in your off-hand, and your shield is drawn lower so it covers less of your view.
+
+For Fabric and NeoForge on Minecraft 26.2, 26.3 and 1.21.1, and Fabric and Forge on 1.20.1 (the lower shield only there). Download it from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/not-now-shield). (Mod ID: `shieldstrip`.)
 
 This is the Minecraft 1.21.1 version. The 26.2 and 26.3 version is on the `main` branch, where hoes and shovels need the same fix.
 
@@ -18,7 +20,7 @@ Pick the `fabric` or `neoforge` file for your loader. For multiplayer, install i
 
 ## Other versions
 
-Minecraft 1.20.1, on Fabric and on Forge, is on the [`1.20.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.20.1) (it only lowers the shield: 1.20.1's axe has no off-hand check). Downloads for 26.2 and 26.3 are on the [Releases page](https://github.com/gabmaybelle/not-now-shield/releases).
+Minecraft 1.20.1, on Fabric and on Forge, is on the [`1.20.1` branch](https://github.com/gabmaybelle/not-now-shield/tree/1.20.1) (it only lowers the shield: 1.20.1's axe has no off-hand check). Every version's download is on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/not-now-shield) and the [Releases page](https://github.com/gabmaybelle/not-now-shield/releases).
 
 ## How it works
 
@@ -40,7 +42,7 @@ The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source,
 
 `./gradlew :fabric:runClientGameTest` and `./gradlew :neoforge:runClientTest` start the game and right-click an axe, a hoe and a shovel with a shield in the off-hand, checking each one changes its block, that an axe on stone leaves the click for the shield, and that a shield is drawn lowered, resting and raised (with a screenshot of each). Fabric's game test API doesn't exist for 1.21.1, so the Fabric test brings its own small harness. The tests use Fabric API's tick event; the mod itself doesn't.
 
-## License
+## Licence
 
 [MIT](LICENSE), from version 1.1.2. Versions up to 1.1.1 were released under CC0-1.0, and copies of those stay CC0.
 
