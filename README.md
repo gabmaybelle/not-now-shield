@@ -1,14 +1,16 @@
 # Not Now, Shield
 
-Your shield, drawn lower. A tiny mod for Minecraft 1.20.1, on Fabric and Forge. (Mod ID: `shieldstrip`.)
+Your shield stops getting in the way.
 
-This is the Minecraft 1.20.1 version. The 26.2 and 26.3 version (Fabric) is on the `main` branch, where the mod also lets tools change blocks while a shield is in your off-hand.
+For Fabric and NeoForge on Minecraft 26.2, 26.3 and 1.21.1, and Fabric and Forge on 1.20.1 (the lower shield only there). Download it from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/not-now-shield). (Mod ID: `shieldstrip`.)
+
+This is the Minecraft 1.20.1 version. The 26.2 and 26.3 version is on the `main` branch and the 1.21.1 version on the `1.21.1` branch, where the mod also lets tools change blocks while a shield is in your off-hand.
 
 Your shield is drawn lower on your screen, resting or raised, so it covers less of your view. It still blocks just the same; only the picture moves, and only on your own screen. Modded shields are lowered too, as long as they are raised like a shield.
 
 ## What it doesn't do on 1.20.1
 
-The 26.2 and 26.3 version also lets axes, hoes and shovels work with a shield in your off-hand ([MC-273378](https://bugs.mojang.com/browse/MC/issues/MC-273378)). Minecraft 1.20.1 doesn't have that problem (its axe doesn't check the off-hand), so there is nothing to fix and this version leaves tools alone.
+The newer versions also let tools work with a shield in your off-hand ([MC-273378](https://bugs.mojang.com/browse/MC/issues/MC-273378)). Minecraft 1.20.1 doesn't have that problem (its axe doesn't check the off-hand), so there is nothing to fix and this version leaves tools alone.
 
 ## Requirements
 
@@ -36,7 +38,7 @@ The icon is Gabby's own sprite, drawn in Aseprite: `art/icon.ase` is the source,
 
 `./gradlew build` runs the unit tests (which items count as a shield) in `common` and again on Forge's game classes. 1.20.1 has no Fabric in-game test, so the finished jars are checked in a real game by hand.
 
-## License
+## Licence
 
 [MIT](LICENSE), from version 1.1.2. Versions up to 1.1.1 were released under CC0-1.0, and copies of those stay CC0.
 
