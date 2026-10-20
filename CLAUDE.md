@@ -40,22 +40,13 @@ CI (`.github/workflows/build.yml`) builds both jars, runs the unit tests and the
   The remote `shieldstrip-private` is an old private repo and must not be pushed to.
 - Licence: MIT from 1.1.2; versions up to 1.1.1 were CC0-1.0.
 
-## Gabby's mods: who does what (the same in every repo)
+## This mod's job
 
-One job per mod, decided 2026-10-15, so nothing is done twice and each repo tells the same story:
+**Not Now, Shield**: the shield drawn lower in first person; on 26.x also tools that change blocks
+while a shield is in the off-hand.
 
-- **Cozy Core** (cozy-core): the Hearth Lantern, which makes the ground around it home: no
-  monsters or phantoms spawn there, and creeper and ghast blasts, fire and endermen leave its
-  blocks alone (each an ordinary game rule, with world-wide switches too); keep your hotbar on
-  death, cheap wood in the stonecutter, re-dyeing and builder trades. Fabric and NeoForge jars, plus a plain
-  data pack of the recipes.
-- **Spawn Gazebo** (spawn-gazebo): the gazebo at the world spawn and its starter chest.
-- **Nightfall Clock** (nightfall-clock): the clock above the hotbar and the dusk warning.
-- **Pocket List** (pocket-list): the gathering checklist.
-- **Not Now, Shield** (not-now-shield): the shield drawn lower in first person; on 26.x also
-  tools that change blocks while a shield is in the off-hand.
-
-A new feature goes in the mod whose job it is. If none fits, ask Gabby before adding it anywhere.
+Gabby has other mods, each with its own job. Add only features that fit this mod's job. If an
+idea doesn't fit, don't add it here or start it in another repo: ask Gabby where it goes.
 
 ## Working on Gabby's mods (the same in every repo)
 
