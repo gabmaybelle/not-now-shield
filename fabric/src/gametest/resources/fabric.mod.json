@@ -10,6 +10,9 @@
 			"com.gabbymaybelle.shieldstrip.VideoTour"
 		]
 	},
+	"mixins": [
+		"shieldstrip-film.mixins.json"
+	],
 	"depends": {
 		"shieldstrip": "*"
 	}

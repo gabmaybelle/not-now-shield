@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
@@ -27,6 +29,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptio
 import net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
@@ -34,8 +37,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.BlockHitResult;
@@ -52,21 +57,20 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>{@code videoTour}: film at all (without it the test returns at once).
  * <li>{@code videoScenes=a,b,w_*}: film only these scenes (a trailing * matches a prefix).
- * <li>{@code videoScout}: one still per scene, at its first camera position, then on to the next.
+ * <li>{@code videoScout}: two stills per scene, its first frame and its last, without saving the frames
+ * between (the scene still plays through, so the last still shows the result).
  * <li>{@code videoSeed=<seed>}: the seed for a new world.
  * <li>{@code videoWorld=<zip or folder>}: film in this saved world instead of making one.
  * <li>{@code videoStage[=<zip>]}: after staging a new world, save it (by default as
  * {@code build/video_world.zip}, outside the run folder, which each game test clears).
+ * <li>{@code videoSkin=<png>}: dress the player in this slim-armed skin (Gabby's is in mods-media
+ * {@code scenery/player-skin/}), through a resource pack made only for this run.
+ * <li>{@code videoTickRate=<ticks a second>}: the game's speed while filming (10 by default). A shader
+ * pack makes each saved frame slower, so the world runs on between frames: use 5 with one, so
+ * frames.tsv's ticks column again goes up by about 2 a frame, as without a shader.
  * </ul>
  */
 public final class Film {
-	/** Thrown by {@link #record} in a scout pass once a scene's first frame is saved. */
-	public static final class Cut extends RuntimeException {
-		Cut() {
-			super(null, null, false, false);
-		}
-	}
-
 	/** A spot and the way it faces (a yaw), so shots can be given as "out, to the side, up". */
 	public record Spot(double x, double y, double z, float yaw) {
 		/** {@code out} blocks the way the spot faces, {@code side} to its right, {@code up} above it. */
@@ -148,6 +152,7 @@ public final class Film {
 	 */
 	public void take(Supplier<TestSingleplayerContext> make, Runnable stage, Runnable scenes) {
 		clearFolder();
+		skin(prop("videoSkin", ""));
 		try {
 			try {
 				open(make, stage);
@@ -348,7 +353,8 @@ public final class Film {
 	 * The rules every take needs, each from a refilm: no command replies or game-rule lines in chat;
 	 * the clock, weather and mobs held still; every advancement granted so none pops up as a toast,
 	 * then the experience they gave taken away so no level shows over the hotbar; half tick rate, so
-	 * one saved frame is one tick and 20 frames a second plays at the game's real pace.
+	 * one saved frame is one tick and 20 frames a second plays at the game's real pace (slower still
+	 * with {@code videoTickRate}, for a shader pack's slower frames).
 	 */
 	public void standardSet() {
 		rule("send_command_feedback", "false");
@@ -361,10 +367,46 @@ public final class Film {
 		server.runCommand("xp set @a 0 points");
 		server.runCommand("weather clear");
 		server.runCommand("time set 6000");
-		server.runCommand("tick rate 10");
+		server.runCommand("tick rate " + prop("videoTickRate", "10"));
 		// The game-rule lines reach chat a few ticks after the command: clear it after they arrive.
 		ctx.waitTicks(5);
 		quiet();
+	}
+
+	/**
+	 * Puts the skin in place of every slim default skin with a resource pack in the game folder, and
+	 * turns the pack on. The test player ("Player0") gets a slim default skin, so this shows on it;
+	 * {@link #thirdPerson} checks that it did.
+	 */
+	private void skin(String png) {
+		if (png.isEmpty()) {
+			return;
+		}
+		Path pack = FabricLoader.getInstance().getGameDir().resolve("resourcepacks/film-skin");
+		try {
+			Path slim = pack.resolve("assets/minecraft/textures/entity/player/slim");
+			Files.createDirectories(slim);
+			// 97 is 26.x's resource pack format; change it with the version seam below.
+			Files.writeString(pack.resolve("pack.mcmeta"), "{\"pack\": {\"description\": \"Filming skin\", \"min_format\": 97, \"max_format\": 97}}");
+			for (String name : List.of("alex", "ari", "efe", "kai", "makena", "noor", "steve", "sunny", "zuri")) {
+				Files.copy(Path.of(png), slim.resolve(name + ".png"), StandardCopyOption.REPLACE_EXISTING);
+			}
+		} catch (IOException e) {
+			throw new AssertionError("couldn't make the skin pack", e);
+		}
+		AtomicReference<CompletableFuture<Void>> reload = new AtomicReference<>();
+		ctx.runOnClient(mc -> {
+			var repo = mc.getResourcePackRepository();
+			repo.reload();
+			List<String> on = new ArrayList<>(repo.getSelectedIds());
+			on.add("file/film-skin");
+			repo.setSelected(on);
+			reload.set(mc.reloadResourcePacks());
+		});
+		ctx.waitFor(mc -> reload.get().isDone(), 1200);
+		ctx.waitTicks(5);
+		check(ctx.computeOnClient(mc -> mc.getResourcePackRepository().getSelectedIds().contains("file/film-skin")), "the skin pack is on");
+		note("skin", png);
 	}
 
 	// ------------------------------------------------------------------ scenes
@@ -389,12 +431,13 @@ public final class Film {
 		target = null;
 		try {
 			body.run();
-			log("end", "");
-		} catch (Cut cut) {
-			typing = false;
-			log("scout", "");
-			// Cut short, perhaps with a chest or chat open: tidy up as a failed scene does.
-			recover();
+			if (scout && frame > 1) {
+				// The scene's last frame, so the scout shows how it ends as well as how it starts.
+				frame--;
+				still();
+				frame++;
+			}
+			log(scout ? "scout" : "end", "");
 		} catch (AssertionError | RuntimeException e) {
 			String why = String.valueOf(e.getMessage());
 			failures.add(name + ": " + why);
@@ -457,14 +500,43 @@ public final class Film {
 			chunks();
 			quiet();
 		}
+		if (!scout || frame == 0) {
+			still();
+		}
+		frame++;
+	}
+
+	/** Saves the current frame with its log line and the game's checks. */
+	private void still() {
 		String flags = ctx.computeOnClient(mc -> flags(mc, frame == 0));
 		ctx.takeScreenshot(TestScreenshotOptions.of(String.format(Locale.ROOT, "%s_%04d", scene, frame)).disableCounterPrefix().withDestinationDir(dir));
 		String cursor = ctx.computeOnClient(mc -> screen(mc) == null ? "-\t-" : (int) mc.mouseHandler.xpos() + "\t" + (int) mc.mouseHandler.ypos());
 		frames.add(scene + "\t" + frame + "\t" + cursor + "\t" + TICKS.get() + "\t" + flags);
-		frame++;
-		if (scout) {
-			throw new Cut();
+	}
+
+	/**
+	 * Makes sure filming has begun before what comes next. A scene's first frame waits for the
+	 * camera to arrive and the world to draw, so a creeper's fuse or another timed event started
+	 * before it can be over by the time the first frame is saved: start it after this.
+	 */
+	public void rolling() {
+		if (frame == 0) {
+			record(1);
 		}
+	}
+
+	/**
+	 * Films until {@code done} holds on the server (up to twenty seconds). {@link #until} runs its
+	 * test on the client's thread, where the server can't be asked.
+	 */
+	public void untilServer(Predicate<MinecraftServer> done) {
+		for (int i = 0; i < 200; i++) {
+			if (server.computeOnServer(done::test)) {
+				return;
+			}
+			record(1);
+		}
+		throw new AssertionError(scene + " waited twenty seconds at frame " + frame);
 	}
 
 	/**
@@ -593,6 +665,8 @@ public final class Film {
 			mc.player.setYRot(yaw);
 			mc.player.setXRot(pitch);
 			mc.player.setYHeadRot(yaw);
+			// In third person the body turns with the head, not a step behind it.
+			mc.player.setYBodyRot(yaw);
 		});
 	}
 
@@ -665,12 +739,52 @@ public final class Film {
 
 	// ------------------------------------------------------------------ the player
 
+	/**
+	 * Natural monster spawning on or off. The set-up turns {@code spawn_mobs} off, and the server
+	 * only rechecks whether monsters may spawn when the difficulty or {@code spawn_monsters}
+	 * changes, so this makes it look again. Monsters still only spawn in the dark and more than 24
+	 * blocks from a player, so a Short is better off without a scene that waits for them.
+	 */
+	public void monsters(boolean on) {
+		server.runCommand("gamerule spawn_mobs " + on);
+		server.runCommand("gamerule spawn_monsters " + on);
+		server.runOnServer(MinecraftServer::updateMobSpawningFlags);
+	}
+
+	/**
+	 * Off camera, between scenes: clear weather, no dropped items, and a wait until rain has faded
+	 * (it takes a few seconds once the weather clears) and anything just killed has finished its
+	 * death animation.
+	 */
+	public void calm() {
+		server.runCommand("weather clear");
+		server.runCommand("kill @e[type=minecraft:item]");
+		for (int i = 0; i < 40 && ctx.computeOnClient(mc -> mc.level.getRainLevel(1) > 0); i++) {
+			ctx.waitTicks(5);
+		}
+		ctx.waitTicks(25);
+	}
+
 	public void spectator() {
 		server.runCommand("gamemode spectator @a");
 	}
 
 	public void survival() {
 		server.runCommand("gamemode survival @a");
+	}
+
+	/**
+	 * Third person from behind (or back to first person). A tall 9:16 window leaves the main hand
+	 * off screen in first person, so film tool scenes this way. The camera looks past the head at
+	 * the crosshair, so aim near the clicked block's edge (an inset of about 0.12) and keep
+	 * {@code distance} about 6 (the game's default is 4): the change then shows beside the head.
+	 */
+	public void thirdPerson(boolean on, double distance) {
+		ctx.runOnClient(mc -> mc.options.setCameraType(on ? CameraType.THIRD_PERSON_BACK : CameraType.FIRST_PERSON));
+		server.runCommand(String.format(Locale.ROOT, "attribute @p minecraft:camera_distance base set %.1f", on ? distance : 4.0));
+		if (on && !prop("videoSkin", "").isEmpty()) {
+			check(ctx.computeOnClient(mc -> mc.player.getSkin().model() == PlayerModelType.SLIM), "the player has a slim skin, so the filming skin shows");
+		}
 	}
 
 	public void hud(boolean show) {
