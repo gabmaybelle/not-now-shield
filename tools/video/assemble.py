@@ -30,6 +30,17 @@ SCENES = [
     ('s_view', 0, None, ['SEE MORE OF', 'YOUR *WORLD*'], 390),
     ('s_loop', 0, None, None, 0),
 ]
+# For the voiced version (HOLD=1 in the environment): frames to hold each scene's last frame for,
+# so the lines have room to breathe. Each scene ends on a still result (the stripped log, the bright
+# copper, the path, the view, the loop's first spot), so holding it shows nothing that didn't happen.
+HOLD = {'s_garden': 16, 's_loop': 32} if os.environ.get('HOLD') == '1' else {}
+# Also for the voiced version: frames to open a scene on its first frame (the axe aimed at the log,
+# before anything happens) while the first line is said, pulling slowly back from ZOOM to the
+# normal view so the opening still moves; the bark then comes off as the line ends. The scene's
+# caption waits for the real frames' result (CAPTION_FROM, counted in the scene's own frames).
+PRE = {'s_strip': 39} if os.environ.get('HOLD') == '1' else {}
+ZOOM = 1.08
+CAPTION_FROM = {'s_strip': 3}
 BADGE_BOX = (40, 250, 540, 350)
 
 FONTS = [os.environ.get('CAPTION_FONT', ''), 'C:/Windows/Fonts/ariblk.ttf', '/usr/share/fonts/truetype/msttcorefonts/Arial_Black.ttf',
@@ -103,13 +114,22 @@ for scene, first, last, lines, top in SCENES:
     dest = os.path.join(work, scene)
     os.makedirs(dest)
     cap = caption(lines, top) if lines else None
-    for i, n in enumerate(range(first, end)):
+    pre = PRE.get(scene, 0)
+    cap_from = pre + CAPTION_FROM.get(scene, 0) if pre else 0
+    for i, n in enumerate([first] * pre + list(range(first, end)) + [end - 1] * HOLD.get(scene, 0)):
         img = Image.open(os.path.join(frames_dir, names[n])).convert('RGBA')
         if img.size != (W, H):
             img = img.resize((W, H), Image.LANCZOS)
+        if i < pre:
+            # Ease from ZOOM back to 1 over the opening hold, centred.
+            k = i / pre
+            z = ZOOM - (ZOOM - 1) * (1 - (1 - k) ** 2)
+            cw, ch = W / z, H / z
+            box = ((W - cw) / 2, (H - ch) / 2, (W + cw) / 2, (H + ch) / 2)
+            img = img.resize((W, H), Image.LANCZOS, box=box)
         img.alpha_composite(BADGE)
-        if cap is not None:
-            a = min(1.0, (i + 1) / FADE_IN)
+        if cap is not None and i >= cap_from:
+            a = min(1.0, (i - cap_from + 1) / FADE_IN)
             layer = cap.copy()
             layer.putalpha(layer.getchannel('A').point(lambda v: int(v * a)))
             img.alpha_composite(layer)
@@ -124,7 +144,7 @@ for scene, *_ in SCENES:
         '-vf', 'format=yuv420p', '-r', '30', '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', clip)
     starts[scene] = t
     first, end = kept[scene]
-    t += (end - first) / FPS
+    t += (PRE.get(scene, 0) + end - first + HOLD.get(scene, 0)) / FPS
     clips.append(clip)
 total = t
 with open(os.path.join(work, 'list.txt'), 'w') as f:
@@ -142,7 +162,7 @@ for scene, frame, kind, what in actions:
     first, end = kept[scene]
     if not first <= frame < end:
         continue
-    at = starts[scene] + (frame - first) / FPS
+    at = starts[scene] + (PRE.get(scene, 0) + frame - first) / FPS
     cues.append((at, random.choice(SOUND[kind]), 0.9 + random.random() * 0.2, 0.8))
 inputs, filters = [], []
 for i, (at, sound, pitch, volume) in enumerate(cues):
@@ -151,7 +171,7 @@ for i, (at, sound, pitch, volume) in enumerate(cues):
     filters.append(f'[{i}:a]aformat=sample_rates=44100:channel_layouts=stereo,asetrate={44100 * pitch:.0f},aresample=44100,'
                    f'volume={volume},adelay={ms}|{ms}[s{i}]')
 mix = ''.join(f'[s{i}]' for i in range(len(cues)))
-filters.append(f'{mix}amix=inputs={len(cues)}:normalize=0,apad,atrim=0:{total:.3f}[a]')
+filters.append(f'{mix}amix=inputs={len(cues)}:normalize=0,apad=whole_dur={total:.3f},atrim=0:{total:.3f}[a]')
 audio = os.path.join(work, 'sound.wav')
 run('ffmpeg', '-y', *inputs, '-filter_complex', ';'.join(filters), '-map', '[a]', audio)
 run('ffmpeg', '-y', '-i', silent, '-i', audio, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '160k',

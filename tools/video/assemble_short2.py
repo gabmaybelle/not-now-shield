@@ -31,6 +31,10 @@ SCENES = [
     ('s_walk', ['SEE MORE OF', 'YOUR *WORLD*'], 390, 0),
     ('s_loop', None, 0, 0),
 ]
+# Frames to hold each scene's last (still) frame for, so a voiceover's lines have room to breathe:
+# the creeper standing there, the smoke clearing, the loop's first spot. Nothing moves in those
+# frames, so holding one shows nothing that didn't happen. HOLD=0 in the environment turns them off.
+HOLD = {'s_reveal': 18, 's_block': 8, 's_loop': 16} if os.environ.get('HOLD', '1') != '0' else {}
 # Over the last shot, low in the safe zone and left of YouTube's buttons (the right ~19%).
 CTA = ['FOLLOW FOR MORE', '*COZY* MODS']
 CTA_TOP = 1250
@@ -114,6 +118,7 @@ for index, (scene, lines, top, from_frame) in enumerate(SCENES):
     if not names:
         print('no frames for', scene, '(skipped)')
         continue
+    names += [names[-1]] * HOLD.get(scene, 0)
     kept[scene] = len(names)
     dest = os.path.join(work, scene)
     os.makedirs(dest)
