@@ -7,7 +7,8 @@
 	"entrypoints": {
 		"fabric-client-gametest": [
 			"com.gabbymaybelle.shieldstrip.ShieldstripClientTest",
-			"com.gabbymaybelle.shieldstrip.VideoTour"
+			"com.gabbymaybelle.shieldstrip.VideoTour",
+			"com.gabbymaybelle.shieldstrip.Part1"
 		]
 	},
 	"mixins": [

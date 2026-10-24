@@ -46,7 +46,8 @@ public class VideoTour implements FabricClientGameTest {
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
-		if (!Film.on(PREFIX)) {
+		// A Part 1 run (-PvideoPart1) films only Part1.
+		if (!Film.on(PREFIX) || Part1.on()) {
 			return;
 		}
 		film = new Film(context, PREFIX, "video_tour");
